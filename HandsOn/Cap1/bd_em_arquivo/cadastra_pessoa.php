@@ -33,6 +33,7 @@ if ($_POST["buscar"]) {
 			}
 		}   
 	}
+	fclose($file);
 
 }
 
@@ -73,6 +74,7 @@ while (!feof($file)) {
 		$pessoas[] = $pessoa;
 	}   
 }
+fclose($file);
 
 // var_dump($pessoas);
 

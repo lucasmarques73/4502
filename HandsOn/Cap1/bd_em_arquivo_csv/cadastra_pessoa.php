@@ -38,6 +38,8 @@ if ($_POST["buscar"]) {
 		}   
 	}
 
+	fclose($file);
+
 }
 
 if ($_POST["salvar"]) {
@@ -80,6 +82,7 @@ while (!feof($file)) {
 		$pessoas[] = $pessoa;
 	} 
 }
+fclose($file);
 
 echo "</pre>";
 ?>
