@@ -1,65 +1,66 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Pagamento Boleto</title>
-</head>
-<body>
-
-	<form method="POST" action="#">
-
-		<label>Data Vencimento</label>
-		<input type="date" name="data_vencimento">
-
-		<button type="submit">Pagar</button>
-		
-	</form>
-
-</body>
-</html>
-
-
 <?php 
 
+echo "<pre>";
+
+$hora_uma = strtotime('01:00');
+$hora_onze = strtotime('23:00');
+// $data_pagamento = new DateTime('2017-09-30 00:59');
+// 	$hora_pagamento = strtotime(date('00:59'));
+
+$isAgendamento = false;
+
+if (!isset($_POST['data_pagamento'])) {
+	$data_pagamento = new DateTime();
+	$hora_pagamento = strtotime(date('H:i'));
+} else {
+	$isAgendamento = true;
+	$data_pagamento = dataing($_POST['data_pagamento']);
+	$data_pagamento = new DateTime($data_pagamento);
+	$hora_pagamento = strtotime(date('01:00'));
+}
+
 if (isset($_POST['data_vencimento'])) {
-
 	$data_vencimento = dataing($_POST['data_vencimento']);
-
-
-	$data_atual = new DateTime('2017-09-30 00:59');
-	$hora_atual = strtotime(date('00:59'));
-
-	$data_atual = new DateTime();
-	$hora_atual = strtotime(date('H:i'));
-
-	$hora_uma = strtotime('01:00');
-	$hora_onze = strtotime('23:00');
-
+	$data_vencimento = new DateTime($data_vencimento);
+} else {
+	$data_vencimento = dataing($data_pagamento);
 	$data_vencimento = new DateTime($data_vencimento);
 
-	echo "<pre>";
+}
+if (($data_vencimento->format('w') == 6 )) {
+	$data_vencimento->add(new DateInterval('P2D'));
+}
+if (($data_vencimento->format('w') == 7 )) {
+	$data_vencimento->add(new DateInterval('P1D'));
+}	
 
-	// var_dump($data_atual);
-	// var_dump($data_vencimento);
-	// var_dump('hora_atual',$hora_atual);
-	// var_dump('hora_uma',$hora_uma);
-	// var_dump('hora_onze',$hora_onze);
+$dias_vencidos = $data_vencimento->diff($data_pagamento);
 
+if ($data_vencimento < $data_pagamento ) {
 	
-
-	if ($data_vencimento < $data_atual ) {
-		echo "<p>Boleto esta Vencido</p>";
-			
-		$dias_vencidos = $data_vencimento->diff($data_atual);
-		// var_dump($dias_vencidos);
-
-		echo "Esta vencido a: " . $dias_vencidos->format("%Y anos, %M meses, %D dias, %H horas, %I minutos");
-
-	} elseif (($hora_atual > $hora_uma) && ($hora_atual <= $hora_onze)) {
-		echo "<p>Boleto Pago!</p>";
+	if ($isAgendamento) {
+		$msg =  "<p>Não podemos agendar nesta data!</p>";
+		$class = "danger";
+	} else {
+		$msg =  "<p>Boleto esta Vencido</p>";
+		$msg =  $msg . "<p>Esta vencido a: " . $dias_vencidos->format("%Y anos, %M meses, %D dias, %H horas, %I minutos</p>");
+		$class = "danger";
 	}
-	else{
-		echo "<p>Fora do horario de pagamento</p>";
+
+} elseif (($hora_pagamento >= $hora_uma) && ($hora_pagamento <= $hora_onze)) {
+	if ($isAgendamento) {
+		$msg =  "<p>Boleto Agendado para pagamento no dia " . $data_pagamento->format('d/m/Y') . "</p>";
+		$class = "success";
+	} else {
+		$msg =  "<p>Boleto Pago!</p>";
+		$class = "success";
+
 	}
+	
+}
+else{
+	$msg =  "<p>Fora do horario de pagamento</p>";
+	$class = "danger";
 }
 
 
@@ -83,3 +84,48 @@ function dataing($databr)
 		return false;
  
 }
+echo "</pre>";
+?>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Pagamento Boleto</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container">
+		<div class="row">
+			<div class="col-6 align-self-center">
+				<form method="POST" action="#" class="form">
+
+				<div class="form-group">
+					<label>Data Vencimento</label>
+					<input class="form-control" type="date" name="data_vencimento">
+				</div>		
+
+				<div class="form-group">
+					<label>Agendar Data Pagamento</label>
+					<input class="form-control" type="date" name="data_pagamento">
+				</div>
+					
+
+					<button type="submit">Pagar</button>
+					
+				</form>
+
+				<div>
+					<p></p>
+					<div class='alert alert-<?php echo $class ?>' role="alert"><?php echo $msg ?></div>
+				</div>
+			</div>
+		</div>	
+</div>
+</body>
+</html>
+
+
