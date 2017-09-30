@@ -2,7 +2,6 @@
 
 echo "<pre>";
 
-
 if (!isset($_POST["salvar"])) {
 	$_POST["salvar"] = false;
 }
@@ -11,33 +10,10 @@ if (!isset($_POST["buscar"])) {
 	$_POST["buscar"] = false;
 }
 
-
-$isFind = false;
-if ($_POST["buscar"]) {
-
-	$nome = $_POST["nome"];
-
-	$file = fopen('bd.txt', 'r');
-	while (!feof($file)) {
-		
-		$line = fgets($file);
-		if ($line) {
-			
-			if (!$isFind) {
-				$pessoa = json_decode($line);
-
-				if ($nome == $pessoa->nome) {
-					$isFind = true;
-					$find_pessoa = $pessoa;
-				}
-			}
-		}   
-	}
-
-}
+$pessoas = array();
+$pessoas = json_decode(file_get_contents('bd.txt'));
 
 if ($_POST["salvar"]) {
-
 
 	if (!isset($_POST["nome"])) {
 		$_POST["nome"] = "";
@@ -55,30 +31,41 @@ if ($_POST["salvar"]) {
 	'idade'     => $_POST["idade"],
 	);
 
-	$json = json_encode($json);
+	$dados = json_decode(file_get_contents('bd.txt'));
 
-	file_put_contents('bd.txt', $json . "\r\n", FILE_APPEND);
+	$dados[] = $json;
+
+	$dados = json_encode($dados);
+
+	file_put_contents('bd.txt', $dados );
 
 	$class  = "success";
 	$msg    = "Cadastrado com Sucesso!";
+
+	$pessoas = json_decode(file_get_contents('bd.txt'));
 }
 
-$pessoas = array();
-$file = fopen('bd.txt', 'r');
-while (!feof($file)) {
-	
-	$line = fgets($file);
-	if ($line) {
-		$pessoa = json_decode($line);
-		$pessoas[] = $pessoa;
-	}   
-}
+$isFind = false;
+$isError = false;
+if ($_POST["buscar"]) {
 
-// var_dump($pessoas);
+	$nome = $_POST["nome"];
+	$nomes = array_column($pessoas, "nome");
+	$key = array_search($nome, $nomes);
+
+	if ($key === false) {
+		$isError = true;
+		$class  = "danger";		
+		$msg = "Náo encontrado!";
+	} else {
+		$isFind = true;
+		$find_pessoa = $pessoas[$key];
+	}
+
+}
 
 echo "</pre>";
 ?>
-
 
 <!DOCTYPE html>
 <html>
@@ -132,7 +119,7 @@ echo "</pre>";
 					<button type="submit" class="btn btn-info">Buscar</button>
 				</form>
 
-				<?php if ($isFind): ?>
+				<?php if ($isFind && !$isError): ?>
 					<div>
 						<div class="card">
 					  	<div class="card-block">
@@ -145,6 +132,13 @@ echo "</pre>";
 						</div>							
 					</div>
 				<?php endif; ?>
+
+				<?php 
+				if ($isError){
+
+					echo "<div class='alert alert-" . $class . "' role='alert'>" . $msg . "</div>";
+				}
+				?>
 			</div>
 			<div class="col-4">
 			<table class="table">
