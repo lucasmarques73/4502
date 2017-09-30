@@ -36,9 +36,6 @@ if ($_POST["buscar"]) {
 
 }
 
-
-
-
 if ($_POST["salvar"]) {
 
 
