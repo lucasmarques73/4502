@@ -71,8 +71,7 @@ if ($_POST["salvar"]) {
 
 
 function dataing($databr)
-{
- 
+{ 
 	//explode a data recebida nas "/", separando dia, mes e ano
 	$data = explode("/", $databr);
 
